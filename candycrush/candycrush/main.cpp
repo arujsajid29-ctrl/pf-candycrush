@@ -12,12 +12,23 @@ const float CELL_SIZE = 60.f;
 const float OFFSET_X = 60.f;
 const float OFFSET_Y = 120.f;
 
-int countHelper(int row, int col, int counter) {
+int countHelper_forRows(int row, int col, int counter) {
 	for (int j = col; j < col + 3; j++) {
 		if (marked[row][j] == false) {
 			counter++;
 		}
 		marked[row][j] = true;
+	}
+
+	return counter;
+}
+
+int countHelper_forCols(int row, int col, int counter) {
+	for (int i = row; i < row + 3; i++) {
+		if (marked[i][col] == false) {
+			counter++;
+		}
+		marked[i][col] = true;
 	}
 
 	return counter;
@@ -34,7 +45,15 @@ int findMatches() {
 	for (int i = 0; i < ROWS; i++) {
 		for (int j = 0; j < COLS - 2; j++) {
 			if (board[i][j] == board[i][j + 1] && board[i][j + 1] == board[i][j + 2] && board[i][j] != 0) {
-				counter = countHelper(i, j, counter);
+				counter = countHelper_forRows(i, j, counter);
+			}
+		}
+	}
+	//check matches in cols
+	for(int i = 0; i < ROWS - 2; i++){
+		for (int j = 0; j < COLS; j++) {
+			if (board[i][j] == board[i + 1][j] && board[i + 1][j] == board[i + 2][j] && board[i][j] != 0) {
+				counter = countHelper_forCols(i, j, counter);
 			}
 		}
 	}

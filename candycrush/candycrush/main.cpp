@@ -1,14 +1,46 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <fstream>
-using namespace std; 
+using namespace std;
 
 const int ROWS = 8;
 const int COLS = 8;
 int board[ROWS][COLS];
+bool marked[ROWS][COLS];
+
 const float CELL_SIZE = 60.f;
 const float OFFSET_X = 60.f;
 const float OFFSET_Y = 120.f;
+
+int countHelper(int row, int col, int counter) {
+	for (int j = col; j < col + 3; j++) {
+		if (marked[row][j] == false) {
+			counter++;
+		}
+		marked[row][j] = true;
+	}
+
+	return counter;
+}
+int findMatches() {
+	int counter = 0;
+	for (int i = 0; i < ROWS; i++) {// Reset loops
+		for (int j = 0; j < COLS; j++) {
+			marked[i][j] = false;
+		}
+	}
+
+	//check matches in row
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLS - 2; j++) {
+			if (board[i][j] == board[i][j + 1] && board[i][j + 1] == board[i][j + 2] && board[i][j] != 0) {
+				counter = countHelper(i, j, counter);
+			}
+		}
+	}
+	return counter;
+}
+
 
 void loadLevel(string filename) {
 	ifstream file(filename);
@@ -50,25 +82,13 @@ void handleInput(sf::RenderWindow& window) {
 	}
 }
 void updateGame() {
-	
-}
-bool marked[ROWS][COLS];
 
-int findMatches() {
-	int counter = 0;
-	for (int i = 0; i < ROWS; i++) {
-		for (int j = 0; j < COLS; j++) {
-			marked[i][j] = false;
-			if (board[i][j] == board[i][j + 1] == board[i][j + 2] || board[i][j] == board[i + 1][j] == board[i + 2][j]) {
-				marked[i][j] = true;
-				counter++;
-			}
-		}
-	}
-	return counter; 
 }
 
-void drawGame(sf::RenderWindow& window) {
+
+
+
+void drawGame(sf::RenderWindow & window) {
 	window.clear(sf::Color(25, 25, 45));
 	sf::CircleShape candy(24.f);
 	for (int r = 0; r < ROWS; r++) {
@@ -83,14 +103,19 @@ void drawGame(sf::RenderWindow& window) {
 	}
 	window.display();
 }
+
 int main() {
 	loadLevel("level.txt");
 	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
 	window.setFramerateLimit(60);
+	sf::CircleShape candy(28.f);
+	candy.setFillColor(sf::Color::Red);
+	candy.setPosition({ 20.f, 100.f });
 	while (window.isOpen()) {
 		handleInput(window);
 		updateGame();
 		drawGame(window);
 	}
+	system("Pause");
 	return 0;
 }

@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 using namespace std; 
 
-<<<<<<< Updated upstream
 void handleInput(sf::RenderWindow& window) {
 	while (true) {
 		auto event = window.pollEvent();
@@ -13,7 +12,8 @@ void handleInput(sf::RenderWindow& window) {
 			window.close();
 		}
 	}
-=======
+}
+void updateGame() {
 const int rows = 8;
 const int cols = 8;
 
@@ -32,16 +32,12 @@ int findMatches() {
 		}
 	}
 
-	return counter;
->>>>>>> Stashed changes
-}
-void updateGame() {
-
 }
 void drawGame(sf::RenderWindow& window, sf::CircleShape& candy) {
 	window.clear(sf::Color(25, 25, 45));
 	window.draw(candy);
 	window.display();
+	return counter;
 }
 int main() {
 	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");

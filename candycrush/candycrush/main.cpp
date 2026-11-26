@@ -12,13 +12,17 @@ const int CELL = 70;
 const int BOARD_X = 20;
 const int BOARD_Y = 100;
 
-bool cellFromClick() {
-
+bool cellFromClick(int x, int y, int& row, int& col) {
+	if (x < BOARD_X || x >= BOARD_X + COLS * CELL) {
+		return false;
+	}
+	if (y < BOARD_Y || y >= BOARD_Y + ROWS * CELL) {
+		return false;
+	}
+	row = (y - BOARD_Y) / CELL;
+	col = (x - BOARD_X) / CELL;
 	return true;
 }
-
-
-
 
 int countHelper_forRows(int row, int col, int counter) {
 	for (int j = col; j < col + 3; j++) {

@@ -5,6 +5,8 @@ using namespace std;
 
 const int ROWS = 8;
 const int COLS = 8;
+int selRow = -1;
+int selCol = -1;
 int board[ROWS][COLS];
 bool marked[ROWS][COLS];
 
@@ -22,6 +24,16 @@ bool cellFromClick(int x, int y, int& row, int& col) {
 	row = (y - BOARD_Y) / CELL;
 	col = (x - BOARD_X) / CELL;
 	return true;
+}
+
+void handleClick(int x, int y) {
+	int row = -1, col = -1;
+	if (!cellFromClick(x, y, row, col)) {
+		return;
+	}
+	if (selRow == -1) {
+		selRow = row; selCol = col;
+	}
 }
 
 int countHelper_forRows(int row, int col, int counter) {
@@ -44,7 +56,7 @@ int countHelper_forCols(int row, int col, int counter) {
 	}
 
 	return counter;
-}
+
 int findMatches() {
 	int counter = 0;
 	for (int i = 0; i < ROWS; i++) {// Reset loops
@@ -71,7 +83,6 @@ int findMatches() {
 	}
 	return counter;
 }
-
 
 void loadLevel(string filename) {
 	ifstream file(filename);
@@ -115,9 +126,6 @@ void handleInput(sf::RenderWindow& window) {
 void updateGame() {
 
 }
-
-
-
 
 void drawGame(sf::RenderWindow & window) {
 	window.clear(sf::Color(25, 25, 45));

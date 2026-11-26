@@ -8,9 +8,17 @@ const int COLS = 8;
 int board[ROWS][COLS];
 bool marked[ROWS][COLS];
 
-const float CELL_SIZE = 60.f;
-const float OFFSET_X = 60.f;
-const float OFFSET_Y = 120.f;
+const int CELL = 70;
+const int BOARD_X = 20;
+const int BOARD_Y = 100;
+
+bool cellFromClick() {
+
+	return true;
+}
+
+
+
 
 int countHelper_forRows(int row, int col, int counter) {
 	for (int j = col; j < col + 3; j++) {
@@ -115,7 +123,7 @@ void drawGame(sf::RenderWindow & window) {
 			int val = board[r][c];
 			if (val != 0) {
 				candy.setFillColor(getCandyColor(val));
-				candy.setPosition({ OFFSET_X + c * CELL_SIZE + 6.f, OFFSET_Y + r * CELL_SIZE + 6.f });
+				candy.setPosition({ BOARD_X + c * CELL + 6.f, BOARD_Y + r * CELL + 6.f });
 				window.draw(candy);
 			}
 		}

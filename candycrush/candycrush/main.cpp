@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <fstream>
+#include <cstdlib>
 using namespace std;
 
 const int ROWS = 8;
@@ -33,6 +34,14 @@ void handleClick(int x, int y) {
 	}
 	if (selRow == -1) {
 		selRow = row; selCol = col;
+		return;
+	}
+	if (abs(selRow - row) + abs(selCol - col) == 1) {
+		//swap
+		cout << "swap try" << endl;
+	}
+	else {
+		selRow = row; selCol = col;
 	}
 }
 
@@ -56,14 +65,16 @@ int countHelper_forCols(int row, int col, int counter) {
 	}
 
 	return counter;
+}
 
 int findMatches() {
-	int counter = 0;
-	for (int i = 0; i < ROWS; i++) {// Reset loops
-		for (int j = 0; j < COLS; j++) {
-			marked[i][j] = false;
+		int counter = 0;
+		for (int i = 0; i < ROWS; i++) {// Reset loops
+			for (int j = 0; j < COLS; j++) {
+				marked[i][j] = false;
+			}
 		}
-	}
+
 
 	//check matches in row
 	for (int i = 0; i < ROWS; i++) {
@@ -144,17 +155,19 @@ void drawGame(sf::RenderWindow & window) {
 }
 
 int main() {
-	loadLevel("level.txt");
-	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
-	window.setFramerateLimit(60);
-	sf::CircleShape candy(28.f);
-	candy.setFillColor(sf::Color::Red);
-	candy.setPosition({ 20.f, 100.f });
-	while (window.isOpen()) {
-		handleInput(window);
-		updateGame();
-		drawGame(window);
-	}
+	//loadLevel("level.txt");
+	//sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
+	//window.setFramerateLimit(60);
+	//sf::CircleShape candy(28.f);
+	//candy.setFillColor(sf::Color::Red);
+	//candy.setPosition({ 20.f, 100.f });
+	//while (window.isOpen()) {
+	//	handleInput(window);
+	//	updateGame();
+	//	drawGame(window);
+	//}
+	handleClick(325, 320);
+	cout << selRow << " " << selCol;
 	system("Pause");
 	return 0;
 }

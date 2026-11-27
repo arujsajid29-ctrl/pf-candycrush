@@ -273,7 +273,7 @@ void drawGame(sf::RenderWindow & window) {
 	hudText.setCharacterSize(24);
 	hudText.setFillColor(sf::Color::White);
 	hudText.setPosition({ 20.f, 20.f });
-	hudText.setString("Score: " + to_string(score) + " / " + to_string(targetScore) + "    Moves: " + to_string(movesleft));
+	hudText.setString("Score: " + to_string(score) + "\tMoves: " + to_string(movesleft) + "\tTarget: " + to_string(targetScore));
 	window.draw(hudText);
 	window.display();
 }

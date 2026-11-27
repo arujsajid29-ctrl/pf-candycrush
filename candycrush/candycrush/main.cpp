@@ -12,12 +12,13 @@ const int ROWS = 8;
 const int COLS = 8;
 int selRow = -1;
 int selCol = -1;
+const float CANDY_OFFSET = 11.f;
 int board[ROWS][COLS];
 bool marked[ROWS][COLS];
 
-const int CELL = 70;
-const int BOARD_X = 20;
-const int BOARD_Y = 100;
+const float CELL = 70.f;
+const float BOARD_X = 20.f;
+const float BOARD_Y = 100.f;
 
 const int POINTS_PER_CANDY = 10;
 int score = 0;
@@ -80,8 +81,8 @@ bool cellFromClick(int x, int y, int& row, int& col) {
 	if (y < BOARD_Y || y >= BOARD_Y + ROWS * CELL) {
 		return false;
 	}
-	row = (y - BOARD_Y) / CELL;
-	col = (x - BOARD_X) / CELL;
+	row = static_cast<int>((y - BOARD_Y) / CELL);
+	col = static_cast<int>((x - BOARD_X) / CELL);
 	return true;
 }
 
@@ -250,7 +251,7 @@ void drawSelectionRing(sf::RenderWindow& window) {
 	ring.setFillColor(sf::Color::Transparent);
 	ring.setOutlineThickness(4.f);
 	ring.setOutlineColor(sf::Color::White);
-	ring.setPosition({ BOARD_X + selCol * CELL + 6.f, BOARD_Y + selRow * CELL + 6.f });
+	ring.setPosition({ BOARD_X + selCol * CELL + CANDY_OFFSET, BOARD_Y + selRow * CELL + CANDY_OFFSET });
 	window.draw(ring);
 }
 
@@ -258,12 +259,18 @@ void drawSelectionRing(sf::RenderWindow& window) {
 void drawGame(sf::RenderWindow & window) {
 	window.clear(sf::Color(25, 25, 45));
 	sf::CircleShape candy(24.f);
+	sf::RectangleShape cell({ CELL * 1.f, CELL * 1.f });
+	cell.setFillColor(sf::Color(15, 15, 30));
+	cell.setOutlineThickness(1.f);
+	cell.setOutlineColor(sf::Color(60, 60, 90));
 	for (int r = 0; r < ROWS; r++) {
 		for (int c = 0; c < COLS; c++) {
 			int val = board[r][c];
+			cell.setPosition({ BOARD_X + c * CELL, BOARD_Y + r * CELL });
+			window.draw(cell);
 			if (val != 0) {
 				candy.setFillColor(getCandyColor(val));
-				candy.setPosition({ BOARD_X + c * CELL + 6.f, BOARD_Y + r * CELL + 6.f });
+				candy.setPosition({ BOARD_X + c * CELL + CANDY_OFFSET, BOARD_Y + r * CELL + CANDY_OFFSET});
 				window.draw(candy);
 			}
 		}

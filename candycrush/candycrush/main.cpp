@@ -181,14 +181,12 @@ void drawSelectionRing(sf::RenderWindow& window) {
 	if (selRow == -1) {
 		return;
 	}
-	else {
-		sf::CircleShape ring(24.f);
-		ring.setFillColor(sf::Color::Transparent);
-		ring.setOutlineThickness(4.f);
-		ring.setOutlineColor(sf::Color::White);
-		ring.setPosition({ BOARD_X + selCol * CELL + 6.f, BOARD_Y + selRow * CELL + 6.f });
-		window.draw(ring);
-	}
+	sf::CircleShape ring(24.f);
+	ring.setFillColor(sf::Color::Transparent);
+	ring.setOutlineThickness(4.f);
+	ring.setOutlineColor(sf::Color::White);
+	ring.setPosition({ BOARD_X + selCol * CELL + 6.f, BOARD_Y + selRow * CELL + 6.f });
+	window.draw(ring);
 }
 
 

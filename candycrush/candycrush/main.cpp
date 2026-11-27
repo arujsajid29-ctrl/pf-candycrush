@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include <cstdlib>
+#include <ctime>
 using namespace std;
 
 const int ROWS = 8;
@@ -39,6 +40,48 @@ void clearMatches() {
 	}
 }
 
+void applyGravity() {
+	for (int c = 0; c < COLS; c++) {
+		int writeRow = ROWS - 1;
+		for (int r = ROWS - 1; r >= 0; r--) {
+			if (board[r][c] != 0) {
+				board[writeRow][c] = board[r][c];
+				if (writeRow != r) {
+					board[r][c] = 0;
+				}
+				writeRow--;
+			}
+		}
+	}
+}
+
+void refillBoard() {
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLS; j++) {
+			if (board[i][j] == 0) {
+				board[i][j] = rand() % 5 + 1;
+			}
+		}
+	}
+}
+
+int resolveMatchesAndCascades() {
+	int totalMatches = 0;
+	int matches = findMatches();
+	while (matches > 0) {
+		totalMatches += matches;
+		clearMatches();
+		applyGravity();
+		refillBoard();
+		matches = findMatches();
+	}
+	return totalMatches;
+}
+
+int resolveMatchesAndCascades();
+
+
+
 void handleClick(int x, int y) {
 	int row = -1, col = -1;
 	if (!cellFromClick(x, y, row, col)) {
@@ -52,11 +95,13 @@ void handleClick(int x, int y) {
 		int temp = board[selRow][selCol];
 		board[selRow][selCol] = board[row][col];
 		board[row][col] = temp;
-		int matches = findMatches();
-		if (matches > 0) {
-			clearMatches();
+		int totalCleared = resolveMatchesAndCascades();
+		if (totalCleared == 0) {
+			int back = board[selRow][selCol];
+			board[selRow][selCol] = board[row][col];
+			board[row][col] = back;
 		}
-		cout << "swap try | matches found: " << matches << endl;
+		cout << "swap try | matches found: " << totalCleared << endl;
 		selRow = -1;
 		selCol = -1;
 	}
@@ -113,20 +158,6 @@ int findMatches() {
 		}
 	}
 	return counter;
-}
-
-void refillBoard()
-{
-	for (int i = 0;i < ROWS;i++)
-	{
-		for (int j = 0;j < COLS;j++)
-		{
-			if (board[i][j] == 0)
-			{
-				board[i][j] = rand() % 5 + 1;
-			}
-		}
-	}
 }
 
 void loadLevel(string filename) {
@@ -194,6 +225,7 @@ void drawGame(sf::RenderWindow & window) {
 }
 
 int main() {
+	srand(static_cast<unsigned int>(time(0)));
 	loadLevel("level.txt");
 	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
 	window.setFramerateLimit(60);
@@ -204,7 +236,6 @@ int main() {
 		handleInput(window);
 		updateGame();
 		drawGame(window);
-		refillBoard();
 	}
 	return 0;
 }

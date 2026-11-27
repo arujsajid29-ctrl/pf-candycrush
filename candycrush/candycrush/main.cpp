@@ -1,10 +1,13 @@
 #include <iostream>
+#include<string>
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
+#include<utility>
 using namespace std;
 
+sf::Font font;
 const int ROWS = 8;
 const int COLS = 8;
 int selRow = -1;
@@ -15,6 +18,58 @@ bool marked[ROWS][COLS];
 const int CELL = 70;
 const int BOARD_X = 20;
 const int BOARD_Y = 100;
+
+const int POINTS_PER_CANDY = 10;
+int score = 0;
+int movesleft = 0, targetScore = 0;
+
+int resolveMatchesAndCascades();
+
+bool trySwap(int r1, int c1, int r2, int c2)
+{
+	swap(board[r1][c1], board[r2][c2]);
+	int cleared = resolveMatchesAndCascades();
+	if (cleared == 0)
+	{
+		swap(board[r2][c2], board[r1][c1]);
+		return false;
+	}
+	else
+	{
+		score += cleared * POINTS_PER_CANDY;
+		movesleft--;
+		return true;
+	}
+}
+
+bool loadLevel(string filename)
+{
+	score = 0;
+	int fileRows, fileCols;
+	ifstream file(filename);
+
+	if (!file.is_open())
+	{
+		return false;
+	}
+	file >> fileRows >> fileCols;
+	file >> movesleft >> targetScore;
+	for (int i = 0;i < fileRows;i++)
+	{
+		for (int j = 0;j < fileCols;j++)
+		{
+			file >> board[i][j];
+		}
+	}
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			cout << board[r][c] << " ";
+		}
+		cout << endl;
+	}
+	file.close();
+	return true;
+}
 
 int findMatches();
 
@@ -92,6 +147,7 @@ void handleClick(int x, int y) {
 		board[selRow][selCol] = board[row][col];
 		board[row][col] = temp;
 		int totalCleared = resolveMatchesAndCascades();
+		movesleft--;
 		if (totalCleared == 0) {
 			int back = board[selRow][selCol];
 			board[selRow][selCol] = board[row][col];
@@ -156,25 +212,6 @@ int findMatches() {
 	return counter;
 }
 
-void loadLevel(string filename) {
-	ifstream file(filename);
-	if (!file.is_open()) {
-		cout << "Could not open " << filename << endl;
-		return;
-	}
-	for (int r = 0; r < ROWS; r++) {
-		for (int c = 0; c < COLS; c++) {
-			file >> board[r][c];
-		}
-	}
-	file.close();
-	for (int r = 0; r < ROWS; r++) {
-		for (int c = 0; c < COLS; c++) {
-			cout << board[r][c] << " ";
-		}
-		cout << endl;
-	}
-}
 sf::Color getCandyColor(int value) {
 	if (value == 1) return sf::Color::Red;
 	if (value == 2) return sf::Color::Green;
@@ -232,12 +269,28 @@ void drawGame(sf::RenderWindow & window) {
 		}
 	}
 	drawSelectionRing(window);
+	sf::Text hudText(font);
+	hudText.setCharacterSize(24);
+	hudText.setFillColor(sf::Color::White);
+	hudText.setPosition({ 20.f, 20.f });
+	hudText.setString("Score: " + to_string(score) + " / " + to_string(targetScore) + "    Moves: " + to_string(movesleft));
+	window.draw(hudText);
 	window.display();
 }
 
 int main() {
+	
+	//Firstly Loading the levelLoad
+	if (!loadLevel("level.txt"))
+	{
+		cout << "Error in loadLevel file Oops!" << endl;
+		return -1;
+	}
 	srand(static_cast<unsigned int>(time(0)));
-	loadLevel("level.txt");
+	if (!font.openFromFile("C:/Windows/Fonts/arial.ttf"))
+	{
+		cout << "Font is not loading" << endl;
+	}
 	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
 	window.setFramerateLimit(60);
 	//sf::CircleShape candy(28.f);

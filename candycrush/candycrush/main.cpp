@@ -115,6 +115,20 @@ int findMatches() {
 	return counter;
 }
 
+void refillBoard()
+{
+	for (int i = 0;i < ROWS;i++)
+	{
+		for (int j = 0;j < COLS;j++)
+		{
+			if (board[i][j] == 0)
+			{
+				board[i][j] = rand() % 5 + 1;
+			}
+		}
+	}
+}
+
 void loadLevel(string filename) {
 	ifstream file(filename);
 	if (!file.is_open()) {
@@ -190,6 +204,7 @@ int main() {
 		handleInput(window);
 		updateGame();
 		drawGame(window);
+		refillBoard();
 	}
 	return 0;
 }

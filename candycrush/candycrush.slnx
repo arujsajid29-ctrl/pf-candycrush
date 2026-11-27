@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="candycrush/candycrush.vcxproj" Id="86a3e77d-9d4b-4438-ab4c-34af8c3c08e1" />
+  <Project Path="candycrush/candycrush.vcxproj" />
 </Solution>

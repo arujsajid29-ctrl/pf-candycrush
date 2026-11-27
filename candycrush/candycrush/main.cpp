@@ -15,6 +15,8 @@ const int CELL = 70;
 const int BOARD_X = 20;
 const int BOARD_Y = 100;
 
+int findMatches();
+
 bool cellFromClick(int x, int y, int& row, int& col) {
 	if (x < BOARD_X || x >= BOARD_X + COLS * CELL) {
 		return false;
@@ -27,6 +29,16 @@ bool cellFromClick(int x, int y, int& row, int& col) {
 	return true;
 }
 
+void clearMatches() {
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			if (marked[r][c]) {
+				board[r][c] = 0;
+			}
+		}
+	}
+}
+
 void handleClick(int x, int y) {
 	int row = -1, col = -1;
 	if (!cellFromClick(x, y, row, col)) {
@@ -37,8 +49,16 @@ void handleClick(int x, int y) {
 		return;
 	}
 	if (abs(selRow - row) + abs(selCol - col) == 1) {
-		//swap
-		cout << "swap try" << endl;
+		int temp = board[selRow][selCol];
+		board[selRow][selCol] = board[row][col];
+		board[row][col] = temp;
+		int matches = findMatches();
+		if (matches > 0) {
+			clearMatches();
+		}
+		cout << "swap try | matches found: " << matches << endl;
+		selRow = -1;
+		selCol = -1;
 	}
 	else {
 		selRow = row; selCol = col;
@@ -132,6 +152,11 @@ void handleInput(sf::RenderWindow& window) {
 		if (event->is<sf::Event::Closed>()) {
 			window.close();
 		}
+		if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
+			if (mouse->button == sf::Mouse::Button::Left) {
+				handleClick(mouse->position.x, mouse->position.y);
+			}
+		}
 	}
 }
 void updateGame() {
@@ -155,19 +180,16 @@ void drawGame(sf::RenderWindow & window) {
 }
 
 int main() {
-	//loadLevel("level.txt");
-	//sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
-	//window.setFramerateLimit(60);
+	loadLevel("level.txt");
+	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
+	window.setFramerateLimit(60);
 	//sf::CircleShape candy(28.f);
 	//candy.setFillColor(sf::Color::Red);
 	//candy.setPosition({ 20.f, 100.f });
-	//while (window.isOpen()) {
-	//	handleInput(window);
-	//	updateGame();
-	//	drawGame(window);
-	//}
-	handleClick(325, 320);
-	cout << selRow << " " << selCol;
-	system("Pause");
+	while (window.isOpen()) {
+		handleInput(window);
+		updateGame();
+		drawGame(window);
+	}
 	return 0;
 }

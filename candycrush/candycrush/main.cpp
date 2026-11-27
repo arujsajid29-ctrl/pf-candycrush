@@ -136,6 +136,9 @@ int resolveMatchesAndCascades() {
 
 void handleClick(int x, int y) {
 	int row = -1, col = -1;
+	if (movesleft <= 0) {
+		return;
+	}
 	if (!cellFromClick(x, y, row, col)) {
 		return;
 	}
@@ -144,17 +147,7 @@ void handleClick(int x, int y) {
 		return;
 	}
 	if (abs(selRow - row) + abs(selCol - col) == 1) {
-		int temp = board[selRow][selCol];
-		board[selRow][selCol] = board[row][col];
-		board[row][col] = temp;
-		int totalCleared = resolveMatchesAndCascades();
-		movesleft--;
-		if (totalCleared == 0) {
-			int back = board[selRow][selCol];
-			board[selRow][selCol] = board[row][col];
-			board[row][col] = back;
-		}
-		//cout << "swap try | matches found: " << totalCleared << endl;
+		trySwap(selRow, selCol, row, col);
 		selRow = -1;
 		selCol = -1;
 	}
@@ -290,13 +283,13 @@ int main() {
 	//Firstly Loading the levelLoad
 	if (!loadLevel("level.txt"))
 	{
-		cout << "Error in loadLevel file Oops!" << endl;
+		//cout << "Error in loadLevel file Oops!" << endl;
 		return -1;
 	}
 	srand(static_cast<unsigned int>(time(0)));
 	if (!font.openFromFile("C:/Windows/Fonts/arial.ttf"))
 	{
-		cout << "Font is not loading" << endl;
+		//cout << "Font is not loading" << endl;
 	}
 	sf::RenderWindow window(sf::VideoMode({ 600, 680 }), "Candy Crush");
 	window.setFramerateLimit(60);

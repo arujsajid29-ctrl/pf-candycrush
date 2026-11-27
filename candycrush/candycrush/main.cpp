@@ -59,7 +59,7 @@ void refillBoard() {
 	for (int i = 0; i < ROWS; i++) {
 		for (int j = 0; j < COLS; j++) {
 			if (board[i][j] == 0) {
-				board[i][j] = rand() % 5 + 1;
+				board[i][j] = rand() % 6 + 1;
 			}
 		}
 	}
@@ -77,10 +77,6 @@ int resolveMatchesAndCascades() {
 	}
 	return totalMatches;
 }
-
-int resolveMatchesAndCascades();
-
-
 
 void handleClick(int x, int y) {
 	int row = -1, col = -1;
@@ -101,7 +97,7 @@ void handleClick(int x, int y) {
 			board[selRow][selCol] = board[row][col];
 			board[row][col] = back;
 		}
-		cout << "swap try | matches found: " << totalCleared << endl;
+		//cout << "swap try | matches found: " << totalCleared << endl;
 		selRow = -1;
 		selCol = -1;
 	}
@@ -185,6 +181,7 @@ sf::Color getCandyColor(int value) {
 	if (value == 3) return sf::Color::Blue;
 	if (value == 4) return sf::Color::Yellow;
 	if (value == 5) return sf::Color::Magenta;
+	if (value == 6) return sf::Color(170, 90, 255);
 	return sf::Color::Transparent;
 }
 

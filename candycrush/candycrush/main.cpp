@@ -23,6 +23,8 @@ const float BOARD_Y = 100.f;
 const int POINTS_PER_CANDY = 10;
 int score = 0;
 int movesleft = 0, targetScore = 0;
+bool isWon = false;
+bool Gameover = false;
 
 int resolveMatchesAndCascades();
 
@@ -134,7 +136,23 @@ int resolveMatchesAndCascades() {
 	return totalMatches;
 }
 
+void chcekGameStatus()
+{
+	if (score >= targetScore)
+	{
+		isWon = true;
+	}
+	else if (movesleft <= 0)
+	{
+		Gameover = true;
+	}
+}
+
 void handleClick(int x, int y) {
+	if (isWon || Gameover)
+	{
+		return;
+	}
 	int row = -1, col = -1;
 	if (movesleft <= 0) {
 		return;
@@ -150,6 +168,7 @@ void handleClick(int x, int y) {
 		trySwap(selRow, selCol, row, col);
 		selRow = -1;
 		selCol = -1;
+		chcekGameStatus();
 	}
 	else {
 		selRow = row; selCol = col;
@@ -273,7 +292,15 @@ void drawGame(sf::RenderWindow & window) {
 	hudText.setCharacterSize(24);
 	hudText.setFillColor(sf::Color::White);
 	hudText.setPosition({ 20.f, 20.f });
-	hudText.setString("Score: " + to_string(score) + "\tMoves: " + to_string(movesleft) + "\tTarget: " + to_string(targetScore));
+	if (isWon) {
+		hudText.setString("You Win! Score: " + to_string(score));
+	}
+	else if (Gameover) {
+		hudText.setString("Game Over! Out of Moves.");
+	}
+	else {
+		hudText.setString("Score: " + to_string(score) + "       Moves: " + to_string(movesleft) + "       Target: " + to_string(targetScore));
+	}
 	window.draw(hudText);
 	window.display();
 }

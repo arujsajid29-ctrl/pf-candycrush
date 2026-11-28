@@ -23,8 +23,6 @@ const float BOARD_Y = 100.f;
 const int POINTS_PER_CANDY = 10;
 int score = 0;
 int movesleft = 0, targetScore = 0;
-bool isWon = false;
-bool Gameover = false;
 
 int resolveMatchesAndCascades();
 
@@ -41,6 +39,12 @@ bool trySwap(int r1, int c1, int r2, int c2)
 	{
 		score += cleared * POINTS_PER_CANDY;
 		movesleft--;
+		if (movesleft <= 0) {
+			movesleft = 0;
+			if (score < targetScore) {
+				outOfMoves = true;
+			}
+		}
 		return true;
 	}
 }
@@ -48,6 +52,7 @@ bool trySwap(int r1, int c1, int r2, int c2)
 bool loadLevel(string filename)
 {
 	score = 0;
+	outOfMoves = false;
 	int fileRows, fileCols;
 	ifstream file(filename);
 
@@ -136,6 +141,47 @@ int resolveMatchesAndCascades() {
 	return totalMatches;
 }
 
+bool findHintMove(int& r1, int& c1, int& r2, int& c2) {
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			if (c + 1 < COLS) {
+				swap(board[r][c], board[r][c + 1]);
+				bool matched = (findMatches() > 0);
+				swap(board[r][c], board[r][c + 1]);
+				if (matched) {
+					r1 = r; c1 = c; r2 = r; c2 = c + 1;
+					return true;
+				}
+			}
+			if (r + 1 < ROWS) {
+				swap(board[r][c], board[r + 1][c]);
+				bool matched = (findMatches() > 0);
+				swap(board[r][c], board[r + 1][c]);
+				if (matched) {
+					r1 = r; c1 = c; r2 = r + 1; c2 = c;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void shuffleBoard() {
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			int randR = rand() % ROWS;
+			int randC = rand() % COLS;
+			swap(board[r][c], board[randR][randC]);
+		}
+	}
+	selRow = -1;
+	selCol = -1; 
+	hasHint = false;
+	hintRow = -1;
+	hintCol = -1;
+}
+
 void chcekGameStatus()
 {
 	if (score >= targetScore)
@@ -154,9 +200,10 @@ void handleClick(int x, int y) {
 		return;
 	}
 	int row = -1, col = -1;
-	if (movesleft <= 0) {
+	if (movesleft <= 0 || outOfMoves) {
 		return;
 	}
+	hasHint = false;
 	if (!cellFromClick(x, y, row, col)) {
 		return;
 	}
@@ -249,6 +296,19 @@ void handleInput(sf::RenderWindow& window) {
 				handleClick(mouse->position.x, mouse->position.y);
 			}
 		}
+		if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
+			if (key->code == sf::Keyboard::Key::H && !outOfMoves && movesleft > 0) {
+				int r1 = -1, c1 = -1, r2 = -1, c2 = -1;
+				if (findHintMove(r1, c1, r2, c2)) {
+					hasHint = true;
+					hintRow = r1;
+					hintCol = c1;
+				}
+			}
+			else if (key->code == sf::Keyboard::Key::S && !outOfMoves && movesleft > 0) {
+				shuffleBoard();
+			}
+		}
 	}
 }
 void updateGame() {
@@ -288,6 +348,14 @@ void drawGame(sf::RenderWindow & window) {
 		}
 	}
 	drawSelectionRing(window);
+	if (hasHint && hintRow != -1 && hintCol != -1) {
+		sf::CircleShape hintRing(26.f);
+		hintRing.setFillColor(sf::Color::Transparent);
+		hintRing.setOutlineThickness(4.f);
+		hintRing.setOutlineColor(sf::Color::Cyan);
+		hintRing.setPosition({ BOARD_X + hintCol * CELL + CANDY_OFFSET - 2.f, BOARD_Y + hintRow * CELL + CANDY_OFFSET - 2.f });
+		window.draw(hintRing);
+	}
 	sf::Text hudText(font);
 	hudText.setCharacterSize(24);
 	hudText.setFillColor(sf::Color::White);
@@ -302,6 +370,14 @@ void drawGame(sf::RenderWindow & window) {
 		hudText.setString("Score: " + to_string(score) + "       Moves: " + to_string(movesleft) + "       Target: " + to_string(targetScore));
 	}
 	window.draw(hudText);
+	if (outOfMoves) {
+		sf::Text loseText(font);
+		loseText.setCharacterSize(22);
+		loseText.setFillColor(sf::Color(255, 90, 90));
+		loseText.setPosition({ 20.f, 55.f });
+		loseText.setString("Out of Moves! Target not reached.");
+		window.draw(loseText);
+	}
 	window.display();
 }
 

@@ -23,12 +23,15 @@ const float BOARD_Y = 100.f;
 const int POINTS_PER_CANDY = 10;
 int score = 0;
 int movesleft = 0, targetScore = 0;
+<<<<<<< HEAD
 bool outOfMoves = false;
 bool hasHint = false;
 int hintRow = -1;
 int hintCol = -1;
 bool isWon = false;
 bool Gameover = false;
+=======
+>>>>>>> a3afab6e1b21b4e809f313eee0ab895c76a6c8ac
 
 int resolveMatchesAndCascades();
 void checkGameStatus();
@@ -191,11 +194,16 @@ void shuffleBoard() {
 	hintCol = -1;
 }
 
+<<<<<<< HEAD
 void checkGameStatus()
+=======
+void chcekGameStatus()
+>>>>>>> a3afab6e1b21b4e809f313eee0ab895c76a6c8ac
 {
 	if (score >= targetScore)
 	{
 		isWon = true;
+<<<<<<< HEAD
 		clearSaveFile();
 	}
 	else if (movesleft <= 0)
@@ -204,11 +212,26 @@ void checkGameStatus()
 		Gameover = true;
 		outOfMoves = true;
 		clearSaveFile();
+=======
+	}
+	else if (movesleft <= 0)
+	{
+		Gameover = true;
+>>>>>>> a3afab6e1b21b4e809f313eee0ab895c76a6c8ac
 	}
 }
 
 void handleClick(int x, int y) {
+<<<<<<< HEAD
 	if (isWon || Gameover || movesleft <= 0 || outOfMoves) {
+=======
+	if (isWon || Gameover)
+	{
+		return;
+	}
+	int row = -1, col = -1;
+	if (movesleft <= 0 || outOfMoves) {
+>>>>>>> a3afab6e1b21b4e809f313eee0ab895c76a6c8ac
 		return;
 	}
 	int row = -1, col = -1;
@@ -224,6 +247,7 @@ void handleClick(int x, int y) {
 		trySwap(selRow, selCol, row, col);
 		selRow = -1;
 		selCol = -1;
+		chcekGameStatus();
 	}
 	else {
 		selRow = row; selCol = col;
@@ -500,11 +524,19 @@ void drawGame(sf::RenderWindow & window) {
 	if (isWon) {
 		hudText.setString("You Win! Score: " + to_string(score));
 	}
+<<<<<<< HEAD
 	else if (Gameover || outOfMoves) {
 		hudText.setString("Game Over! Out of Moves.");
 	}
 	else {
 		hudText.setString("Score: " + to_string(score) + "\tMoves: " + to_string(movesleft) + "\tTarget: " + to_string(targetScore));
+=======
+	else if (Gameover) {
+		hudText.setString("Game Over! Out of Moves.");
+	}
+	else {
+		hudText.setString("Score: " + to_string(score) + "       Moves: " + to_string(movesleft) + "       Target: " + to_string(targetScore));
+>>>>>>> a3afab6e1b21b4e809f313eee0ab895c76a6c8ac
 	}
 	window.draw(hudText);
 	if (outOfMoves) {

@@ -27,8 +27,12 @@ bool outOfMoves = false;
 bool hasHint = false;
 int hintRow = -1;
 int hintCol = -1;
+bool isWon = false;
+bool Gameover = false;
 
 int resolveMatchesAndCascades();
+void checkGameStatus();
+void clearSaveFile();
 
 bool trySwap(int r1, int c1, int r2, int c2)
 {
@@ -43,6 +47,7 @@ bool trySwap(int r1, int c1, int r2, int c2)
 	{
 		score += cleared * POINTS_PER_CANDY;
 		movesleft--;
+		checkGameStatus();
 		if (movesleft <= 0) {
 			movesleft = 0;
 			if (score < targetScore) {
@@ -186,11 +191,27 @@ void shuffleBoard() {
 	hintCol = -1;
 }
 
+void checkGameStatus()
+{
+	if (score >= targetScore)
+	{
+		isWon = true;
+		clearSaveFile();
+	}
+	else if (movesleft <= 0)
+	{
+		movesleft = 0;
+		Gameover = true;
+		outOfMoves = true;
+		clearSaveFile();
+	}
+}
+
 void handleClick(int x, int y) {
-	int row = -1, col = -1;
-	if (movesleft <= 0 || outOfMoves) {
+	if (isWon || Gameover || movesleft <= 0 || outOfMoves) {
 		return;
 	}
+	int row = -1, col = -1;
 	hasHint = false;
 	if (!cellFromClick(x, y, row, col)) {
 		return;
@@ -269,6 +290,72 @@ sf::Color getCandyColor(int value) {
 	return sf::Color::Transparent;
 }
 
+void clearSaveFile() {
+	ofstream out("savegame.txt", ios::trunc);
+	out.close();
+}
+
+bool saveGameToFile() {
+	ofstream out("savegame.txt");
+	if (!out.is_open()) {
+		return false;
+	}
+	out << score << " " << movesleft << " " << targetScore << "\n";
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			out << board[r][c];
+			if (c < COLS - 1) {
+				out << " ";
+			}
+		}
+		out << "\n";
+	}
+	out.close();
+	return true;
+}
+
+bool loadSavedGame() {
+	ifstream in("savegame.txt");
+	if (!in.is_open()) {
+		return false;
+	}
+	int savedScore = 0, savedMoves = 0, savedTarget = 0;
+	if (!(in >> savedScore >> savedMoves >> savedTarget)) {
+		in.close();
+		return false;
+	}
+	int tempBoard[ROWS][COLS];
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			if (!(in >> tempBoard[r][c])) {
+				in.close();
+				return false;
+			}
+		}
+	}
+	in.close();
+	for (int r = 0; r < ROWS; r++) {
+		for (int c = 0; c < COLS; c++) {
+			board[r][c] = tempBoard[r][c];
+		}
+	}
+	score = savedScore; 
+	movesleft = savedMoves;
+	targetScore = savedTarget;
+	selRow = -1;
+	selCol = -1;
+	hasHint = false;
+	hintRow = -1; 
+	hintCol = -1;
+	isWon = false;
+	Gameover = false;
+	outOfMoves = false;
+	return true;
+}
+
+bool inMenu = true;
+bool noSavedGame = false;
+
 void handleInput(sf::RenderWindow& window) {
 	while (true) {
 		auto event = window.pollEvent();
@@ -278,12 +365,42 @@ void handleInput(sf::RenderWindow& window) {
 		if (event->is<sf::Event::Closed>()) {
 			window.close();
 		}
-		if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
-			if (mouse->button == sf::Mouse::Button::Left) {
-				handleClick(mouse->position.x, mouse->position.y);
+		if (!inMenu) {
+			if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
+				if (mouse->button == sf::Mouse::Button::Left) {
+					handleClick(mouse->position.x, mouse->position.y);
+				}
 			}
 		}
 		if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
+			if (inMenu) {
+				if (key->code == sf::Keyboard::Key::Enter) {
+					loadLevel("level.txt");
+					noSavedGame = false;
+					inMenu = false;
+				}
+				else if (key->code == sf::Keyboard::Key::C) {
+					if (loadSavedGame()) {
+						noSavedGame = false;
+						inMenu = false;
+					}
+					else {
+						noSavedGame = true;
+					}
+				}
+				continue;
+			}
+
+			if (key->code == sf::Keyboard::Key::Escape && !isWon && !Gameover && !outOfMoves) {
+				saveGameToFile();
+				selRow = -1;
+				selCol = -1;
+				hasHint = false;
+				hintRow = -1;
+				hintCol = -1;
+				inMenu = true;
+				continue;
+			}
 			if (key->code == sf::Keyboard::Key::H && !outOfMoves && movesleft > 0) {
 				int r1 = -1, c1 = -1, r2 = -1, c2 = -1;
 				if (findHintMove(r1, c1, r2, c2)) {
@@ -314,9 +431,42 @@ void drawSelectionRing(sf::RenderWindow& window) {
 	window.draw(ring);
 }
 
-
 void drawGame(sf::RenderWindow & window) {
 	window.clear(sf::Color(25, 25, 45));
+	if (inMenu) {
+		sf::Text titleText(font);
+		titleText.setCharacterSize(32);
+		titleText.setFillColor(sf::Color::White);
+		titleText.setPosition({ 120.f, 180.f });
+		titleText.setString("Candy Crush");
+		window.draw(titleText);
+
+		sf::Text playText(font);
+		playText.setCharacterSize(22);
+		playText.setFillColor(sf::Color::White);
+		playText.setPosition({ 120.f, 250.f });
+		playText.setString("Press ENTER to Play");
+		window.draw(playText);
+
+		sf::Text continueText(font);
+		continueText.setCharacterSize(22);
+		continueText.setFillColor(sf::Color::Cyan);
+		continueText.setPosition({ 120.f, 290.f });
+		continueText.setString("Press C to Continue");
+		window.draw(continueText);
+
+		if (noSavedGame) {
+			sf::Text noSaveText(font);
+			noSaveText.setCharacterSize(22);
+			noSaveText.setFillColor(sf::Color(255, 90, 90));
+			noSaveText.setPosition({ 120.f, 340.f });
+			noSaveText.setString("No saved game");
+			window.draw(noSaveText);
+		}
+
+		window.display();
+		return;
+	}
 	sf::CircleShape candy(24.f);
 	sf::RectangleShape cell({ CELL * 1.f, CELL * 1.f });
 	cell.setFillColor(sf::Color(15, 15, 30));
@@ -347,7 +497,15 @@ void drawGame(sf::RenderWindow & window) {
 	hudText.setCharacterSize(24);
 	hudText.setFillColor(sf::Color::White);
 	hudText.setPosition({ 20.f, 20.f });
-	hudText.setString("Score: " + to_string(score) + "\tMoves: " + to_string(movesleft) + "\tTarget: " + to_string(targetScore));
+	if (isWon) {
+		hudText.setString("You Win! Score: " + to_string(score));
+	}
+	else if (Gameover || outOfMoves) {
+		hudText.setString("Game Over! Out of Moves.");
+	}
+	else {
+		hudText.setString("Score: " + to_string(score) + "\tMoves: " + to_string(movesleft) + "\tTarget: " + to_string(targetScore));
+	}
 	window.draw(hudText);
 	if (outOfMoves) {
 		sf::Text loseText(font);
